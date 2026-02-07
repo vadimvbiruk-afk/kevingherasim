@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Home — kevin gerasim{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-slate-800 mb-6">Home</h1>
+<p class="text-slate-600 mb-8">Welcome to kevin gerasim.</p>
+
+{% if posts %}
+  <ul class="space-y-6">
+    {% for post in posts %}
+      <li class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-slate-800 mb-2">
+          <a href="#" class="hover:underline">{{ post.title }}</a>
+        </h2>
+        <p class="text-sm text-slate-500 mb-2">
+          {{ post.date_posted.strftime('%B %d, %Y') }} — {{ post.author.username }}
+        </p>
+        <div class="text-slate-600 whitespace-pre-wrap mb-4">{{ post.content }}</div>
+        {% if current_user.is_authenticated and current_user.id == post.author.id %}
+          <div class="flex gap-2 pt-2 border-t border-slate-100">
+            <a href="{{ url_for('main.post_edit', post_id=post.id) }}" class="text-sm px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition">
+              Edit
+            </a>
+            <form action="{{ url_for('main.post_delete', post_id=post.id) }}" method="post" class="inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="text-sm px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition" onclick="return confirm('Delete this post?');">
+                Delete
+              </button>
+            </form>
+          </div>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-slate-500">No posts yet. {% if current_user.is_authenticated %}<a href="{{ url_for('main.post_new') }}" class="text-slate-800 font-medium hover:underline">Write the first one</a>.{% endif %}</p>
+{% endif %}
+{% endblock %}
