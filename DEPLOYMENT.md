@@ -10,6 +10,24 @@ On your host (Render, Heroku, PythonAnywhere, etc.), set:
 
 ---
 
+## Render
+
+**Start Command** (paste in Render → Web Service → Build & Deploy → Start Command):
+
+```bash
+gunicorn run:app --bind 0.0.0.0:$PORT
+```
+
+**Environment variables** to add in Render → Environment:
+
+| Key          | Value (example) |
+|-------------|------------------|
+| `FLASK_ENV` | `production`     |
+| `SECRET_KEY` | (generate a long random string) |
+| `DATABASE_URL` | Your Render PostgreSQL internal URL, or `sqlite:///blog.db` for a single free instance (not recommended for production). |
+
+---
+
 ## Domain registrar checklist (Namecheap, GoDaddy, etc.)
 
 Use this at your **domain registrar** (where you bought the domain) to point the domain to a host like **Render** or **PythonAnywhere**.
