@@ -5,54 +5,86 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}kevin gerasim{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { overflow-x: hidden; }
+    #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
-  <nav class="bg-slate-800 text-white shadow-lg">
-    <div class="max-w-4xl mx-auto px-4 flex items-center justify-between h-14">
-      <a href="{{ url_for('main.home') }}" class="text-lg font-semibold hover:text-slate-200">
-        kevin gerasim
-      </a>
-      <div class="flex items-center gap-4">
-        <a href="{{ url_for('main.post_new') }}" class="hover:text-slate-200 transition">
-          New post
-        </a>
-        {% if current_user.is_authenticated %}
-          <a href="{{ url_for('main.dashboard') }}" class="hover:text-slate-200 transition">
-            Dashboard
-          </a>
-          {% if current_user.is_admin %}
-            <a href="{{ url_for('main.admin_dashboard') }}" class="hover:text-slate-200 transition">
-              Admin
-            </a>
-          {% endif %}
-          <a href="{{ url_for('main.logout') }}" class="hover:text-slate-200 transition">
-            Logout
-          </a>
-        {% else %}
-          <a href="{{ url_for('main.login') }}" class="hover:text-slate-200 transition">
-            Log in
-          </a>
-          <a href="{{ url_for('main.register') }}" class="hover:text-slate-200 transition">
-            Register
-          </a>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
+<body class="bg-black min-h-screen text-white antialiased">
+  <canvas id="matrix-canvas" aria-hidden="true"></canvas>
 
-  <main class="max-w-4xl mx-auto px-4 py-8">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="mb-4 space-y-2">
-          {% for category, message in messages %}
-            <li class="px-4 py-2 rounded-lg {% if category == 'error' %}bg-red-100 text-red-800{% elif category == 'success' %}bg-green-100 text-green-800{% else %}bg-slate-200 text-slate-800{% endif %}">
-              {{ message }}
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
-  </main>
+  <div class="relative z-10 min-h-screen flex flex-col px-4">
+    <nav class="rounded-3xl mt-4 max-w-4xl w-full mx-auto bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl">
+      <div class="px-6 py-4 flex items-center justify-between flex-wrap gap-2">
+        <a href="{{ url_for('main.home') }}" class="text-lg font-semibold text-emerald-400 hover:text-emerald-300 transition">
+          kevin gerasim
+        </a>
+        <div class="flex items-center gap-4">
+          <a href="{{ url_for('main.post_new') }}" class="text-white/90 hover:text-emerald-400 transition">New post</a>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.dashboard') }}" class="text-white/90 hover:text-emerald-400 transition">Dashboard</a>
+            {% if current_user.is_admin %}
+              <a href="{{ url_for('main.admin_dashboard') }}" class="text-white/90 hover:text-emerald-400 transition">Admin</a>
+            {% endif %}
+            <a href="{{ url_for('main.logout') }}" class="text-white/90 hover:text-emerald-400 transition">Logout</a>
+          {% else %}
+            <a href="{{ url_for('main.login') }}" class="text-white/90 hover:text-emerald-400 transition">Log in</a>
+            <a href="{{ url_for('main.register') }}" class="text-white/90 hover:text-emerald-400 transition">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto py-8">
+      <div class="rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl p-6 sm:p-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="mb-6 space-y-2">
+              {% for category, message in messages %}
+                <li class="px-4 py-2 rounded-xl text-sm border {% if category == 'error' %}bg-red-500/20 border-red-400/50 text-red-200{% elif category == 'success' %}bg-emerald-500/20 border-emerald-400/50 text-emerald-200{% else %}bg-white/10 border-white/20 text-white/90{% endif %}">
+                  {{ message }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function() {
+      var canvas = document.getElementById('matrix-canvas');
+      var ctx = canvas.getContext('2d');
+      var chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789ABCDEF';
+      var fontSize = 14;
+      var columns = Math.floor(window.innerWidth / fontSize);
+      var drops = Array(columns).fill(1);
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        columns = Math.floor(window.innerWidth / fontSize);
+        drops = Array(columns).fill(1);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#10b981';
+        ctx.font = fontSize + 'px monospace';
+        for (var i = 0; i < drops.length; i++) {
+          var char = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        }
+      }
+      setInterval(draw, 50);
+    })();
+  </script>
 </body>
 </html>

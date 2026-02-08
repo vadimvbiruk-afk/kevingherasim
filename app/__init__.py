@@ -42,9 +42,13 @@ def create_app(config=None):
 
     app.register_blueprint(routes.bp)
 
-    # Create database tables if they don't exist (needed on first deploy, e.g. Render)
+    # One-time reset: set RESET_DB=1 in env, deploy once, then remove RESET_DB and redeploy
     with app.app_context():
-        db.create_all()
+        if os.environ.get("RESET_DB") == "1":
+            db.drop_all()
+            db.create_all()
+        else:
+            db.create_all()
 
     # Force HTTPS and secure headers in production only (avoids breaking local dev)
     if os.environ.get("FLASK_ENV") == "production" or os.environ.get("PRODUCTION"):

@@ -32,7 +32,13 @@ gunicorn run:app --bind 0.0.0.0:$PORT
 
 All `url_for` links and redirects in the app are relative (no hardcoded domain), so the site works on both your `*.onrender.com` URL and your custom domain (e.g. kevingherasim.com).
 
-**Schema updates (if you already had a deployed database):** If your DB was created before Admin/Guest/Image features, run this once in your PostgreSQL client (e.g. Render Shell or psql) so the new columns exist:
+**One-time database reset (fix “out of sync” / register 500):** To wipe old tables and create the new schema (Admin, Guest, Image):
+
+1. In Render → Environment, add **`RESET_DB`** = **`1`**.
+2. Save and let the service redeploy (startup will run `db.drop_all()` then `db.create_all()`).
+3. After the deploy has finished, **remove** the `RESET_DB` variable and trigger a new deploy so the next startup does **not** drop tables again.
+
+**Schema updates (alternative to reset):** If you prefer not to wipe data and your DB was created before Admin/Guest/Image features, run this once in your PostgreSQL client (e.g. Render Shell or psql) so the new columns exist:
 
 ```sql
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
