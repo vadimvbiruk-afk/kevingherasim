@@ -21,6 +21,7 @@ def create_app(config=None):
         "DATABASE_URL", "sqlite:///blog.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB max upload
 
     if config:
         app.config.update(config)
@@ -37,9 +38,13 @@ def create_app(config=None):
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
-    from app import routes
+    from app import routes  # registers User, Post with db via models
 
     app.register_blueprint(routes.bp)
+
+    # Create database tables if they don't exist (needed on first deploy, e.g. Render)
+    with app.app_context():
+        db.create_all()
 
     # Force HTTPS and secure headers in production only (avoids breaking local dev)
     if os.environ.get("FLASK_ENV") == "production" or os.environ.get("PRODUCTION"):

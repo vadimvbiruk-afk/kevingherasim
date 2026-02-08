@@ -24,7 +24,22 @@ gunicorn run:app --bind 0.0.0.0:$PORT
 |-------------|------------------|
 | `FLASK_ENV` | `production`     |
 | `SECRET_KEY` | (generate a long random string) |
-| `DATABASE_URL` | Your Render PostgreSQL internal URL, or `sqlite:///blog.db` for a single free instance (not recommended for production). |
+| `DATABASE_URL` | Your Render PostgreSQL internal URL. |
+| `ADMIN_EMAIL` | Your email address; the user who registers with this email gets Admin privileges. |
+| `CLOUDINARY_CLOUD_NAME` | From Cloudinary dashboard. |
+| `CLOUDINARY_API_KEY` | From Cloudinary dashboard. |
+| `CLOUDINARY_API_SECRET` | From Cloudinary dashboard. |
+
+All `url_for` links and redirects in the app are relative (no hardcoded domain), so the site works on both your `*.onrender.com` URL and your custom domain (e.g. kevingherasim.com).
+
+**Schema updates (if you already had a deployed database):** If your DB was created before Admin/Guest/Image features, run this once in your PostgreSQL client (e.g. Render Shell or psql) so the new columns exist:
+
+```sql
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS author_display_name VARCHAR(64);
+ALTER TABLE posts ALTER COLUMN user_id DROP NOT NULL;
+```
 
 ---
 

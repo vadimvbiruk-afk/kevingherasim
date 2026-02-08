@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Admin — kevin gerasim{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-slate-800 mb-4">Admin dashboard</h1>
+<p class="text-slate-600 mb-6">
+  <a href="{{ url_for('main.admin_users') }}" class="text-slate-800 font-medium hover:underline">View users</a>
+</p>
+
+{% if posts %}
+  <ul class="space-y-6">
+    {% for post in posts %}
+      <li class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-slate-800 mb-2">{{ post.title }}</h2>
+        <p class="text-sm text-slate-500 mb-2">
+          {{ post.date_posted.strftime('%B %d, %Y') }} — {{ post.author_name() }}
+        </p>
+        {% if post.image_url %}
+          <img src="{{ post.image_url }}" alt="" class="rounded-lg mb-4 max-h-48 w-full object-cover object-center">
+        {% endif %}
+        <div class="text-slate-600 whitespace-pre-wrap mb-4">{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</div>
+        <div class="flex gap-2 pt-2 border-t border-slate-100">
+          <a href="{{ url_for('main.post_edit', post_id=post.id) }}" class="text-sm px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition">
+            Edit
+          </a>
+          <form action="{{ url_for('main.post_delete', post_id=post.id) }}" method="post" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="text-sm px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition" onclick="return confirm('Delete this post?');">
+              Delete
+            </button>
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-slate-500">No posts yet.</p>
+{% endif %}
+{% endblock %}

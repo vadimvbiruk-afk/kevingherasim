@@ -14,10 +14,13 @@
           <a href="#" class="hover:underline">{{ post.title }}</a>
         </h2>
         <p class="text-sm text-slate-500 mb-2">
-          {{ post.date_posted.strftime('%B %d, %Y') }} — {{ post.author.username }}
+          {{ post.date_posted.strftime('%B %d, %Y') }} — {{ post.author_name() }}
         </p>
+        {% if post.image_url %}
+          <img src="{{ post.image_url }}" alt="" class="rounded-lg mb-4 max-h-80 w-full object-cover object-center">
+        {% endif %}
         <div class="text-slate-600 whitespace-pre-wrap mb-4">{{ post.content }}</div>
-        {% if current_user.is_authenticated and current_user.id == post.author.id %}
+        {% if post.can_edit_delete(current_user) %}
           <div class="flex gap-2 pt-2 border-t border-slate-100">
             <a href="{{ url_for('main.post_edit', post_id=post.id) }}" class="text-sm px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition">
               Edit
@@ -34,6 +37,6 @@
     {% endfor %}
   </ul>
 {% else %}
-  <p class="text-slate-500">No posts yet. {% if current_user.is_authenticated %}<a href="{{ url_for('main.post_new') }}" class="text-slate-800 font-medium hover:underline">Write the first one</a>.{% endif %}</p>
+  <p class="text-slate-500">No posts yet. <a href="{{ url_for('main.post_new') }}" class="text-slate-800 font-medium hover:underline">Write the first one</a>.</p>
 {% endif %}
 {% endblock %}

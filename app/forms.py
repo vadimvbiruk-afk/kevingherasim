@@ -1,6 +1,7 @@
 """WTForms for the blog application (includes CSRF protection via Flask-WTF)."""
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField
 from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
@@ -64,5 +65,9 @@ class PostForm(FlaskForm):
             "rows": 12,
             "class": "input-field w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 resize-y min-h-[200px]",
         },
+    )
+    image = FileField(
+        "Image (optional)",
+        validators=[FileAllowed(["jpg", "jpeg", "png", "gif", "webp"], "Images only")],
     )
     submit = SubmitField("Publish")
