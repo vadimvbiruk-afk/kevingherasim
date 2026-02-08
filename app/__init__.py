@@ -2,55 +2,34 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 
 db = SQLAlchemy()
-bcrypt = Bcrypt()
-login_manager = LoginManager()
 
 
 def create_app(config=None):
-    """Application factory: create and configure the Flask app."""
+    """Application factory: guestbook app."""
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
         "DATABASE_URL", "sqlite:///blog.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB max upload
 
     if config:
         app.config.update(config)
 
     db.init_app(app)
-    bcrypt.init_app(app)
-    login_manager.init_app(app)
-    login_manager.login_view = "main.login"
-    login_manager.login_message = "Please log in to access this page."
 
-    from app.models import User
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return db.session.get(User, int(user_id))
-
-    from app import routes  # registers User, Post with db via models
+    from app import routes
 
     app.register_blueprint(routes.bp)
 
-    # One-time reset: set RESET_DB=1 in env, deploy once, then remove RESET_DB and redeploy
     with app.app_context():
-        if os.environ.get("RESET_DB") == "1":
-            db.drop_all()
-            db.create_all()
-        else:
-            db.create_all()
+        db.create_all()
 
-    # Force HTTPS and secure headers in production only (avoids breaking local dev)
     if os.environ.get("FLASK_ENV") == "production" or os.environ.get("PRODUCTION"):
         from flask_talisman import Talisman
 

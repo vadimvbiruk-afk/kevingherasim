@@ -1,42 +1,41 @@
 {% extends "base.html" %}
 
-{% block title %}Home — kevin gerasim{% endblock %}
+{% block title %}kevin gerasim{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold text-white mb-2">Home</h1>
-<p class="text-emerald-300/90 mb-8">Welcome to kevin gerasim.</p>
+<h1 class="text-2xl font-bold text-emerald-400 mb-6 font-mono">Guestbook</h1>
+
+<form method="post" class="max-w-xl space-y-4 mb-10" novalidate>
+  {{ form.hidden_tag() }}
+  <div>
+    {{ form.username.label(class="block text-sm font-medium text-emerald-300/90 mb-1 font-mono") }}
+    {{ form.username(class="w-full px-3 py-2 rounded-xl bg-black/50 border border-emerald-500/40 text-white placeholder-white/40 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 font-mono") }}
+    {% if form.username.errors %}
+      <p class="mt-1 text-sm text-red-400 font-mono">{{ form.username.errors[0] }}</p>
+    {% endif %}
+  </div>
+  <div>
+    {{ form.content.label(class="block text-sm font-medium text-emerald-300/90 mb-1 font-mono") }}
+    {{ form.content(class="w-full px-3 py-2 rounded-xl bg-black/50 border border-emerald-500/40 text-white placeholder-white/40 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 font-mono resize-y") }}
+    {% if form.content.errors %}
+      <p class="mt-1 text-sm text-red-400 font-mono">{{ form.content.errors[0] }}</p>
+    {% endif %}
+  </div>
+  <div>
+    <button type="submit" class="glitch px-4 py-2 rounded-xl bg-emerald-600/80 text-white border border-emerald-500/50 hover:bg-emerald-500/80 cursor-pointer transition font-mono text-sm" data-text="Post">Post</button>
+  </div>
+</form>
 
 {% if posts %}
   <ul class="space-y-6">
     {% for post in posts %}
-      <li class="rounded-3xl bg-black/40 backdrop-blur-md border border-white/10 p-6">
-        <h2 class="text-xl font-semibold text-white mb-2">
-          <a href="#" class="hover:text-emerald-400 transition">{{ post.title }}</a>
-        </h2>
-        <p class="text-sm text-emerald-400/80 mb-2">
-          {{ post.date_posted.strftime('%B %d, %Y') }} — {{ post.author_name() }}
-        </p>
-        {% if post.image_url %}
-          <img src="{{ post.image_url }}" alt="" class="rounded-2xl mb-4 max-h-80 w-full object-cover object-center border border-white/10">
-        {% endif %}
-        <div class="text-white/90 whitespace-pre-wrap mb-4">{{ post.content }}</div>
-        {% if post.can_edit_delete(current_user) %}
-          <div class="flex gap-2 pt-2 border-t border-white/10">
-            <a href="{{ url_for('main.post_edit', post_id=post.id) }}" class="text-sm px-3 py-1.5 rounded-xl bg-white/10 text-emerald-300 border border-white/10 hover:bg-white/20 transition">
-              Edit
-            </a>
-            <form action="{{ url_for('main.post_delete', post_id=post.id) }}" method="post" class="inline">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="text-sm px-3 py-1.5 rounded-xl bg-red-500/20 text-red-300 border border-red-400/30 hover:bg-red-500/30 transition" onclick="return confirm('Delete this post?');">
-                Delete
-              </button>
-            </form>
-          </div>
-        {% endif %}
+      <li class="rounded-3xl bg-black/40 backdrop-blur-2xl border border-emerald-500/30 p-6 neon-border">
+        <p class="text-sm text-emerald-400 font-mono mb-2">{{ post.username }} · {{ post.date_posted.strftime('%Y-%m-%d %H:%M') }}</p>
+        <div class="text-white/90 whitespace-pre-wrap font-mono">{{ post.content }}</div>
       </li>
     {% endfor %}
   </ul>
 {% else %}
-  <p class="text-white/70">No posts yet. <a href="{{ url_for('main.post_new') }}" class="text-emerald-400 font-medium hover:underline">Write the first one</a>.</p>
+  <p class="text-white/60 font-mono">No messages yet. Be the first to post.</p>
 {% endif %}
 {% endblock %}

@@ -4,44 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}kevin gerasim{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { overflow-x: hidden; }
+    body { overflow-x: hidden; font-family: 'Share Tech Mono', 'Courier New', monospace; }
     #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+    .glitch {
+      position: relative;
+      display: inline-block;
+    }
+    .glitch:hover::before,
+    .glitch:hover::after {
+      opacity: 1;
+    }
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .glitch::before {
+      left: -2px;
+      text-shadow: 2px 0 #00ff88;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+      animation: glitch-1 0.3s infinite;
+    }
+    .glitch::after {
+      left: 2px;
+      text-shadow: -2px 0 #ff00ff;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+      animation: glitch-2 0.3s infinite;
+    }
+    @keyframes glitch-1 {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-2px, -2px); }
+      80% { transform: translate(2px, 2px); }
+      100% { transform: translate(0); }
+    }
+    @keyframes glitch-2 {
+      0% { transform: translate(0); }
+      20% { transform: translate(2px, -2px); }
+      40% { transform: translate(-2px, 2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(-2px, -2px); }
+      100% { transform: translate(0); }
+    }
+    .neon-border {
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.05);
+    }
   </style>
 </head>
 <body class="bg-black min-h-screen text-white antialiased">
   <canvas id="matrix-canvas" aria-hidden="true"></canvas>
 
   <div class="relative z-10 min-h-screen flex flex-col px-4">
-    <nav class="rounded-3xl mt-4 max-w-4xl w-full mx-auto bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl">
-      <div class="px-6 py-4 flex items-center justify-between flex-wrap gap-2">
-        <a href="{{ url_for('main.home') }}" class="text-lg font-semibold text-emerald-400 hover:text-emerald-300 transition">
-          kevin gerasim
-        </a>
-        <div class="flex items-center gap-4">
-          <a href="{{ url_for('main.post_new') }}" class="text-white/90 hover:text-emerald-400 transition">New post</a>
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.dashboard') }}" class="text-white/90 hover:text-emerald-400 transition">Dashboard</a>
-            {% if current_user.is_admin %}
-              <a href="{{ url_for('main.admin_dashboard') }}" class="text-white/90 hover:text-emerald-400 transition">Admin</a>
-            {% endif %}
-            <a href="{{ url_for('main.logout') }}" class="text-white/90 hover:text-emerald-400 transition">Logout</a>
-          {% else %}
-            <a href="{{ url_for('main.login') }}" class="text-white/90 hover:text-emerald-400 transition">Log in</a>
-            <a href="{{ url_for('main.register') }}" class="text-white/90 hover:text-emerald-400 transition">Register</a>
-          {% endif %}
-        </div>
-      </div>
-    </nav>
+    <header class="mt-4 max-w-4xl w-full mx-auto flex items-center justify-between flex-wrap gap-2">
+      <a href="{{ url_for('main.home') }}" class="glitch text-xl font-semibold text-emerald-400 hover:text-emerald-300 transition" data-text="kevin gerasim">kevin gerasim</a>
+      <div id="system-time" class="text-emerald-400 text-sm tabular-nums">00:00:00</div>
+    </header>
 
     <main class="flex-1 max-w-4xl w-full mx-auto py-8">
-      <div class="rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl p-6 sm:p-8">
+      <div class="rounded-3xl bg-black/40 backdrop-blur-2xl border border-emerald-500/30 shadow-2xl p-6 sm:p-8 neon-border">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <ul class="mb-6 space-y-2">
               {% for category, message in messages %}
-                <li class="px-4 py-2 rounded-xl text-sm border {% if category == 'error' %}bg-red-500/20 border-red-400/50 text-red-200{% elif category == 'success' %}bg-emerald-500/20 border-emerald-400/50 text-emerald-200{% else %}bg-white/10 border-white/20 text-white/90{% endif %}">
+                <li class="px-4 py-2 rounded-xl text-sm border font-mono {% if category == 'error' %}bg-red-500/20 border-red-400/50 text-red-200{% elif category == 'success' %}bg-emerald-500/20 border-emerald-400/50 text-emerald-200{% else %}bg-white/10 border-white/20 text-white/90{% endif %}">
                   {{ message }}
                 </li>
               {% endfor %}
@@ -84,6 +121,17 @@
         }
       }
       setInterval(draw, 50);
+    })();
+
+    (function() {
+      function pad(n) { return n < 10 ? '0' + n : n; }
+      function updateTime() {
+        var d = new Date();
+        var el = document.getElementById('system-time');
+        if (el) el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+      updateTime();
+      setInterval(updateTime, 1000);
     })();
   </script>
 </body>
